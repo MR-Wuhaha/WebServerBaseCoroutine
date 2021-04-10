@@ -57,11 +57,4 @@ int main()
     co_create(&co,NULL,channel::CoroutineFun,&Listen);
     co_resume(co);
     EventLoop::MainLoop(accept_epoll_loop);
-    // pthread_t MainEpollLoop_id;
-    // pthread_create(&MainEpollLoop_id,NULL,EventLoop::MainLoop,accept_epoll_loop);
-    // pthread_setname_np(MainEpollLoop_id,"MLThread");
-    // cout<<"MainLoopThread Start"<<endl;
-    // pthread_join(MainEpollLoop_id,NULL);
-    //ThreadPool mThreadPool(4,100);
-    //mThreadPool.start_thread();
 }
