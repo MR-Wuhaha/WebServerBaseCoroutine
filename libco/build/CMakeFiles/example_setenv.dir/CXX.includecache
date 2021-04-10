@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/MR-Wuhaha/WebServerBaseCoroutine/WebServerBaseCoroutine/libco/co_routine.h
+stdint.h
+-
+sys/poll.h
+-
+pthread.h
+-
+
+/MR-Wuhaha/WebServerBaseCoroutine/WebServerBaseCoroutine/libco/example_setenv.cpp
+unistd.h
+-
+stdio.h
+-
+errno.h
+-
+string.h
+-
+stdlib.h
+-
+queue
+-
+co_routine.h
+/MR-Wuhaha/WebServerBaseCoroutine/WebServerBaseCoroutine/libco/co_routine.h
+
