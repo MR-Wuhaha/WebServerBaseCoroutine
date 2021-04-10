@@ -14,7 +14,7 @@ int Maccept(SP_channel _channel,char *buff,int length)
         int connfd = co_accept(_channel->fd,(struct sockaddr*)&Client_addr,&Client_addr_len);
         if(connfd > 0)
         {
-            fcntl( connfd, F_SETFL, fcntl(connfd, F_GETFL,0 ) );
+            fcntl( connfd, F_SETFL, fcntl(connfd, F_GETFL,0 ) );//协程需要将当前的fd设置为noblock，而不是由用户自己设置，通过hook的fcntl设置
             char client_ip[INET_ADDRSTRLEN];
             inet_ntop(AF_INET,&Client_addr.sin_addr.s_addr,client_ip,sizeof(client_ip));
             LOG<<"accept connect from : " + string(client_ip) + " port:" + to_string(Client_addr.sin_port) << " ClientFd:" << connfd;
