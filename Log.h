@@ -2,7 +2,7 @@
 #define _LOG
 #include"LogFile.h"
 #include<string.h>
-
+#define LOG_FLAG 1
 class LogMessage
 {
     public:
