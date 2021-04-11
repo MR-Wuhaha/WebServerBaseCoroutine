@@ -10,6 +10,7 @@ set(SRCS
     Log.cpp
     LogFile.cpp
     TimeRound.cpp
+    EventLoopThreadPool.cpp
 )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fno-strict-aliasing -Wall -export-dynamic -pipe -D_GNU_SOURCE -D_REENTRANT -fPIC -Wno-unused-variable -pthread -Wl,--no-as-needed -ldl -m64")
 add_executable(WebServerBaseCoroutine ${SRCS})
