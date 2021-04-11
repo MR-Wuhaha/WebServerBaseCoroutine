@@ -31,7 +31,7 @@ int Httpdata::handle_event()
 
 void Httpdata::Add_New_Connect(int fd)
 {
-    //channel* conn_socket = new Httpdata(fd,EPOLLIN | EPOLLET,readn,writen,true);
+    fcntl( fd, F_SETFL, fcntl(fd, F_GETFL,0 ) );//协程需要将当前的fd设置为noblock，而不是由用户自己设置，通过hook的fcntl设置
     SP_channel conn_socket(new Httpdata(fd,readn,writen,time_round));
     stCoRoutine_t* co = 0;
     co_create(&co,NULL,channel::CoroutineFun,&conn_socket);
