@@ -38,15 +38,17 @@ int main(int argv,char** argc)
 
 
     //创建一个时间轮，参数为时间轮的最大定时时间间隔
+#if 1
     TimeRound<channel> time_round = TimeRound<channel>(15);
     time_round.start();
     EventLoop::time_round = &time_round;//需要把时间轮的指针传递到每个EventLoop中，用于创建连接时找到时间论的信息
-
+#endif
     //写日志对象
+#if LOG_FLAG
     LogFile log_file("./ServerLog.txt");
     log_file.Start_Log();
     Log::log_file = &log_file;
-
+#endif
     EventLoop *accept_epoll_loop = new EventLoop(100);//创建请求连接的epoll
     int lsfd = socket(AF_INET,SOCK_STREAM,0);
     if(lsfd < 0)
@@ -69,7 +71,7 @@ int main(int argv,char** argc)
         assert(0);
     }
     listen(lsfd,1000);
-    SP_channel Listen(new Httpdata(lsfd,Maccept,NULL,&time_round));
+    SP_channel Listen(new Httpdata(lsfd,Maccept,NULL,EventLoop::time_round));
     stCoRoutine_t* co = 0;
     co_create(&co,NULL,channel::CoroutineFun,&Listen);
     co_resume(co);
