@@ -1,7 +1,7 @@
 #include"channel.h"
 #include"Epoll.h"
 using namespace std;
-channel::channel(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round):fd(_fd),write(_write),read(_read),time_round(_time_round)
+channel::channel(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round):fd(_fd),write(_write),read(_read),time_round(_time_round),event_loop_thread_pool(nullptr)
 {
     wp_time_round_item = std::weak_ptr<TimeRoundItem<channel>>();
     max_read_write_buff_length = 4096;
@@ -15,28 +15,53 @@ int channel::handle_event()
     HandleRead();
     return 0;
 }
-
+/*
+用于处理数据的协程函数，用于接收数据进行处理，其中的handle_event可以根据需要实现新的虚函数版本
+*/
 void* channel::CoroutineFun(void* ptr)
 {
     co_enable_hook_sys();
-    SP_channel _channel = *((SP_channel*)(ptr));
+    SP_channel channel = *((SP_channel*)(ptr));
     while(true)
     {
-        _channel->handle_event();
+        channel->handle_event();
         //客户端主动关闭
-        if(_channel->read_length < 0 || _channel->write_length < 0)
+        if(channel->read_length < 0 || channel->write_length < 0)
         {
             break;
         }
-        if(!_channel->wp_time_round_item.lock())
+        if(!channel->wp_time_round_item.lock())
         {
             break;
+        }
+    }
+}
+/*
+用于接收分配到的新连接的协程函数
+*/
+void* channel::HandleNewConnectCoroutineFun(void* ptr)
+{
+    co_enable_hook_sys();
+    SP_channel channel = *((SP_channel*)(ptr));
+    uint64_t new_connect_fd;
+    while(true)
+    {
+        channel->HandleRead();
+        if(channel->read_length > 0)
+        {
+            uint64_t* uint64buff = (uint64_t*)(channel->read_buff);
+            for(int i = 0;i < channel->read_length;i = i+sizeof(uint64_t))
+            {
+                new_connect_fd = uint64buff[i/8];
+                channel->Add_New_Connect(new_connect_fd);
+            }
         }
     }
 }
 
 void channel::Add_New_Connect(int fd)
 {
+    fcntl( fd, F_SETFL, fcntl(fd, F_GETFL,0 ) );//协程需要将当前的fd设置为noblock，而不是由用户自己设置，通过hook的fcntl设置
     SP_channel conn_socket(new channel(fd,readn,writen,time_round));
     stCoRoutine_t *co = 0;
     co_create(&co,NULL,channel::CoroutineFun,&conn_socket);
@@ -102,4 +127,9 @@ int channel::handle_close()
         temp->reset();
     }
     Close();
+}
+
+void channel::SetEventLoopThreadPool(EventLoopThreadPool* _event_loop_thread_pool)
+{
+    this->event_loop_thread_pool = _event_loop_thread_pool;
 }
