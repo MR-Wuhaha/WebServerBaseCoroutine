@@ -41,7 +41,7 @@ class channel:public enable_shared_from_this<channel>
         virtual void HandleWrite();
         static void* CoroutineFun(void*);
         static void* HandleNewConnectCoroutineFun(void*);
-        bool Get_KeepAlive_State();
+        virtual bool Get_KeepAlive_State();
         void SetEventLoopThreadPool(EventLoopThreadPool*);
         void Close();
         friend int Maccept(SP_channel _channel,char *buff,int length);

@@ -30,7 +30,8 @@ void* channel::CoroutineFun(void* ptr)
         {
             break;
         }
-        if(!channel->wp_time_round_item.lock())
+        //非长连接或者系统开启时间轮并且处于超时的状态
+        if(!channel->Get_KeepAlive_State() || (channel->Get_KeepAlive_State() && channel->time_round != nullptr && !channel->wp_time_round_item.lock()))
         {
             break;
         }
@@ -76,7 +77,9 @@ void channel::Close()
 channel::~channel()
 {
     close(fd);
+#if LOG_FLAG
     LOG <<"client fd: "<<fd<<" has been closed";
+#endif
     delete[] read_buff;
     delete[] write_buff;
 }
@@ -132,4 +135,9 @@ int channel::handle_close()
 void channel::SetEventLoopThreadPool(EventLoopThreadPool* _event_loop_thread_pool)
 {
     this->event_loop_thread_pool = _event_loop_thread_pool;
+}
+
+bool channel::Get_KeepAlive_State()
+{
+    return false;
 }
