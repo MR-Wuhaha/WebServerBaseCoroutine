@@ -58,6 +58,7 @@ void Httpdata::handle_http(char *buff)
         body += "<html><title>Source Page</title>";
         body += "<body bgcolor=\"ffffff\">";
         body += "!Thank for visiting MRWu_haha's Server!";
+        
         body += "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />";
         body += "<br><a href=\"http://www.baidu.com\">百度一下</a>";
         body += "<br><a href=\"https://join.qq.com\">腾讯招聘</a>";
@@ -81,7 +82,7 @@ void Httpdata::handle_http(char *buff)
             }
             closedir(source);
         }
-
+        
         body += "</body></html>";
         head += Recv_Http->_version + " 200 OK\r\n";
         head += "Connection: Keep-Alive\r\n";
@@ -176,7 +177,9 @@ void Httpdata::handle_request_line(char* buff,int& index,Http_Handle* Recv_Http)
     }
     Recv_Http->_version = temp;
     index = index+2;
+#if LOG_FLAG
     LOG<<Recv_Http->Req+" "+Recv_Http->URI+" "+Recv_Http->_version;
+#endif
     //cout<<Recv_Http->Req<<" "<<Recv_Http->URI<<" "<<Recv_Http->_version<<endl;
 }
 
