@@ -14,5 +14,6 @@ class channel;
 int Maccept(std::shared_ptr<channel> _channel,char *buff,int length);
 int readn(std::shared_ptr<channel> _channel,char *buff,int length);
 int writen(std::shared_ptr<channel> _channel,char *buff,int length);
+int sysread(std::shared_ptr<channel> _channel,char *buff,int length);
 int set_noblock(int);
 #endif
