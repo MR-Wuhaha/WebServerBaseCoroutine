@@ -15,7 +15,7 @@ class Epoll
     private:
         stCoEpoll_t* co_epoll;
     public:
-        Epoll(int _size);
+        Epoll();
         vector<SP_channel> Poll();
 };
 
