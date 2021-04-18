@@ -1,7 +1,8 @@
 #include"Httpdata.h"
 #include"Epoll.h"
 #include"Log.h"
-Httpdata::Httpdata(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round):channel(_fd,_read,_write,_time_round)
+Httpdata::Httpdata(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round):channel(_fd,_read,_write,_time_round),
+Keep_Alive(false)
 {
 
 }
