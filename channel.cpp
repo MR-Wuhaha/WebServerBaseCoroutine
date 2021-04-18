@@ -1,7 +1,8 @@
 #include"channel.h"
 #include"Epoll.h"
+#include"Eventloop.h"
 using namespace std;
-channel::channel(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round):fd(_fd),write(_write),read(_read),time_round(_time_round),event_loop_thread_pool(nullptr)
+channel::channel(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round):fd(_fd),write(_write),read(_read),time_round(_time_round),event_loop_thread_pool(nullptr),event_loop(nullptr)
 {
     wp_time_round_item = std::weak_ptr<TimeRoundItem<channel>>();
     max_read_write_buff_length = 4096;
@@ -64,6 +65,7 @@ void channel::Add_New_Connect(int fd)
 {
     fcntl( fd, F_SETFL, fcntl(fd, F_GETFL,0 ) );//协程需要将当前的fd设置为noblock，而不是由用户自己设置，通过hook的fcntl设置
     SP_channel conn_socket(new channel(fd,readn,writen,time_round));
+    conn_socket->SetEventLoop(this->event_loop);
     stCoRoutine_t *co = 0;
     co_create(&co,NULL,channel::CoroutineFun,&conn_socket);
     co_resume(co);
@@ -76,6 +78,7 @@ void channel::Close()
 
 channel::~channel()
 {
+    event_loop->AddWaitForFreeItem(co_self());
     close(fd);
 #if LOG_FLAG
     LOG <<"client fd: "<<fd<<" has been closed";
@@ -135,6 +138,11 @@ int channel::handle_close()
 void channel::SetEventLoopThreadPool(EventLoopThreadPool* _event_loop_thread_pool)
 {
     this->event_loop_thread_pool = _event_loop_thread_pool;
+}
+
+void channel::SetEventLoop(EventLoop* _event_loop)
+{
+    this->event_loop = _event_loop;
 }
 
 bool channel::Get_KeepAlive_State()

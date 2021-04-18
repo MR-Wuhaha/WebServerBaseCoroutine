@@ -9,7 +9,7 @@
 #include"otherFun.h"
 #include"Log.h"
 #include"libco/co_routine.h"
-class Epoll;
+class EventLoop;
 class channel;
 class Timer_node;
 class EventLoopThreadPool;
@@ -31,8 +31,9 @@ class channel:public enable_shared_from_this<channel>
         std::weak_ptr<TimeRoundItem<channel>> wp_time_round_item;
         //用于分配新连接的线程池，每个线程池中运行多个协程
         EventLoopThreadPool* event_loop_thread_pool;
+        //每个channel都在一个协程中，每个协程运行结束都要回收资源，因此需要找到当时的协程信息，并放入到EventLoop中即将回收的vec中
+        EventLoop* event_loop;
     public:
-        friend class Epoll;
         channel(int _fd,Handle _read,Handle _write,TimeRound<channel>* _time_round);
         virtual ~channel();
         virtual int handle_event();
@@ -43,6 +44,7 @@ class channel:public enable_shared_from_this<channel>
         static void* HandleNewConnectCoroutineFun(void*);
         virtual bool Get_KeepAlive_State();
         void SetEventLoopThreadPool(EventLoopThreadPool*);
+        void SetEventLoop(EventLoop*);
         void Close();
         friend int Maccept(SP_channel _channel,char *buff,int length);
         friend int readn(SP_channel _channel,char *buff,int length);
