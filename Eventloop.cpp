@@ -17,12 +17,13 @@ void* EventLoop::loop(void* ptr)
     EventLoop event_loop(event_fd);
     stCoRoutine_t* co = 0;
     SP_channel event_channel = SP_channel(new Httpdata(event_fd,sysread,writen,time_round));
+    event_channel->SetEventLoop(&event_loop);
     co_create(&co,NULL,channel::HandleNewConnectCoroutineFun,&event_channel);
     co_resume(co);
     while(true)
     {
         cout<<"Epoll Wait Eventfd : "<<event_fd<<endl;
-        event_loop.m_epoll.Poll();
+        co_eventloop(co_get_epoll_ct(),EventLoop::FreeCo,&event_loop);
     }
 }
 //专门用于接收连接的epoll
@@ -32,8 +33,24 @@ void* EventLoop::MainLoop(void* ptr)
     while(true)
     {
         cout<<"Epoll Wait MainLoop"<<endl;
-        vector<SP_channel> event_fd = EVLoop->m_epoll.Poll();
+        co_eventloop(co_get_epoll_ct(),0,0);
     }
 }
- 
+
+void EventLoop::AddWaitForFreeItem(stCoRoutine_t* co)
+{
+    vecWaitforfree.push_back(co);
+}
+
+int EventLoop::FreeCo(void* ptr)
+{
+    EventLoop* event_loop = (EventLoop*)ptr;
+    for(int i = 0;i < event_loop->vecWaitforfree.size();++i)
+    {
+        co_free(event_loop->vecWaitforfree[i]);
+    }
+    event_loop->vecWaitforfree.clear();
+    return 0;
+}
+
 TimeRound<channel>* EventLoop::time_round = nullptr;
