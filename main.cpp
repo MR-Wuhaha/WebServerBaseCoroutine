@@ -72,6 +72,7 @@ int main(int argv,char** argc)
     }
     listen(lsfd,1000);
     SP_channel Listen(new Httpdata(lsfd,Maccept,NULL,EventLoop::time_round));
+    Listen->SetEventLoop(accept_epoll_loop);
     stCoRoutine_t* co = 0;
     co_create(&co,NULL,channel::CoroutineFun,&Listen);
     co_resume(co);
