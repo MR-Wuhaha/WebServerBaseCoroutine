@@ -37,6 +37,7 @@ void* channel::CoroutineFun(void* ptr)
             break;
         }
     }
+    channel->event_loop->AddWaitForFreeItem(co_self());
 }
 /*
 用于接收分配到的新连接的协程函数
@@ -78,7 +79,6 @@ void channel::Close()
 
 channel::~channel()
 {
-    event_loop->AddWaitForFreeItem(co_self());
     close(fd);
 #if LOG_FLAG
     LOG <<"client fd: "<<fd<<" has been closed";
